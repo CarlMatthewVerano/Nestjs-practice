@@ -1,9 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { UsersService } from './users.service';
 
 // Decorators are thing with '@' symbol,
 // it abstracts the some of the logic and makes it easier to use
 @Controller('users') // /users
 export class UsersController {
+
+    constructor(private readonly usersService: UsersService) {}
 
     // Note that the methods like "findAll", "findOne", "create", "update"
     // are just conventional names and can be named anything. The decorators
@@ -11,7 +14,8 @@ export class UsersController {
 
     @Get() // GET /users or /users?role=value
     findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
-        return [];
+        
+        return this.usersService.findAll(role);
     }
 
    // This is an example; if this was placed after the id route
@@ -26,21 +30,23 @@ export class UsersController {
 
     @Get(':id') // GET /users/:id
     findOne(@Param('id') id: string) {
-        return {id};
+        //@Param decorator alwasys returns a string
+        //The + sign is used to convert the string to a number (unary, forced conversion)
+        return this.usersService.findOne(+id);
     }
 
     @Post() // POST /users
-    create(@Body() user: {}) {
-        return user;
+    create(@Body() user: { name: string, email: string, role: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+        return this.usersService.create(user);
     }
 
     @Patch(':id') // PATCH /users/:id
-    update(@Param('id') id: string, @Body() userUpdate: {}) {
-        return {id, ...userUpdate};
+    update(@Param('id') id: string, @Body() userUpdate: { name?: string, email?: string, role?: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+        return this.usersService.update(+id, userUpdate);
     }
 
     @Delete(':id') // DELETE /users/:id
     delete(@Param('id') id: string) {
-        return {id};
+        return this.usersService.delete(+id);
     }
 }
